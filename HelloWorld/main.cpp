@@ -42,14 +42,15 @@ int main() {
 	Model* model;
 	Shader* shader;
 	try {
-		model = new Model();
-		shader   = new Shader();
+		shader = new Shader("Shaders/shader.vert", "Shaders/shader.frag");
+		model  = new Model();
 	}
 	catch (std::exception ex) {
 		std::cout << ex.what();
 		glfwTerminate();
 		return -3;
 	}
+
 
 	while (glfwWindowShouldClose(window) != GL_TRUE) {
 		glClear(GL_COLOR_BUFFER_BIT);
@@ -58,8 +59,8 @@ int main() {
 
 
 		shader->use();
-		model->bindVAO();
 
+		model->bindVAO();
 		glDrawElements(GL_TRIANGLES, model->getIndicesCount(), GL_UNSIGNED_INT, 0);
 
 		shader->stop();
@@ -68,7 +69,7 @@ int main() {
 
 		glfwSwapBuffers(window);
 	}
-	
+
 	glfwTerminate();
 	return 0;
 }

@@ -1,26 +1,23 @@
-#pragma once
+#ifndef SHADER_H
+#define SHADER_H
+
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <sstream>
+
+#include <GL\glew.h>
+
 class Shader {
 private:	
 	GLuint shaderProgram;
 
-	const GLchar* vertexShaderSource = 
-		"#version 330 core\n"
-		"layout (location = 0) in vec3 position;\n"
-		"void main()\n"
-		"{\n"
-		"gl_Position = vec4(position, 1.0);\n"
-		"}\0";
-	const GLchar* fragmentShaderSource = 
-		"#version 330 core\n"
-		"out vec4 color;\n"
-		"void main()\n"
-		"{\n"
-		"color = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
-		"}";
-
-	GLint createShader(GLenum shaderType, GLuint& shaderId);
+	GLint createShader(GLenum shaderType, GLuint& shaderId, const GLchar* fileName);
 public:
-	Shader();
+	Shader(const GLchar* vertexPath, const GLchar* fragmentPath);
 	void use();
 	void stop();
+	GLuint getShaderProgramId();
 };
+
+#endif
