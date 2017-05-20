@@ -4,8 +4,12 @@
 #include <GL/glew.h>
 //GLFW
 #include <GLFW/glfw3.h>
+//GLM
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 #include "shader.h"
 #include "model.h"
+#include "texture.h"
 
 /*
 	Key callback
@@ -41,9 +45,15 @@ int main() {
 
 	Model* model;
 	Shader* shader;
+	Texture* texture1;
+	Texture* texture2;
+	Texture* texture3;
 	try {
 		shader = new Shader("Shaders/shader.vert", "Shaders/shader.frag");
 		model  = new Model();
+		texture1 = new Texture("Textures/container.jpg");
+		texture2 = new Texture("Textures/awesomeface.png");
+		texture3 = new Texture("Textures/epifan.jpg");
 	}
 	catch (std::exception ex) {
 		std::cout << ex.what();
@@ -59,8 +69,17 @@ int main() {
 
 
 		shader->use();
-
 		model->bindVAO();
+
+
+		glm::mat4 trans;
+		trans = glm::translate(trans, glm::vec3(sin(glfwGetTime()) / 2, cos(glfwGetTime()) / 2, 0.0f));
+		trans = glm::rotate(trans, glm::radians(static_cast<float>(glfwGetTime() * 100.0f)), glm::vec3(0.0f, 0.0f, 1.0f));
+		shader->sendTransformationMatrix(trans);
+		shader->sendSampler(texture1->getTextureId(), texture1->getTextureUnit());
+		shader->sendSampler(texture2->getTextureId(), texture2->getTextureUnit());
+		shader->sendSampler(texture3->getTextureId(), texture3->getTextureUnit());
+
 		glDrawElements(GL_TRIANGLES, model->getIndicesCount(), GL_UNSIGNED_INT, 0);
 
 		shader->stop();
@@ -109,7 +128,8 @@ void sceneInitialization(GLFWwindow* window, GLFWkeyfun cbfun)
 	glfwGetFramebufferSize(window, &width, &height);
 
 	glViewport(0, 0, width, height);
-	glClearColor(0.2f, 0.3f, 0.4f, 0.5f);
+	//glClearColor(0.2f, 0.3f, 0.4f, 0.5f);
+	glClearColor(0.0f, 0.25f, 0.0f, 1.0f);
 
 	glfwSetKeyCallback(window, cbfun);
 }

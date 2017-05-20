@@ -53,14 +53,27 @@ GLint Shader::createShader(GLenum shaderType, GLuint& shaderId, const GLchar* fi
 	return compileStatus;
 }
 
-void Shader::use() {
+void Shader::use() const {
 	glUseProgram(shaderProgram);
 }
 
-void Shader::stop() {
+void Shader::stop() const {
 	glUseProgram(0);
 }
 
-GLuint Shader::getShaderProgramId() {
+GLuint Shader::getShaderProgramId() const {
 	return shaderProgram;
+}
+
+void Shader::sendTransformationMatrix(const glm::mat4 matrix) const {
+	GLint transformationMatrixLoc = glGetUniformLocation(shaderProgram, "transformationMatrix");
+	glUniformMatrix4fv(transformationMatrixLoc, 1, GL_FALSE, glm::value_ptr(matrix));
+}
+
+void Shader::sendSampler(GLuint textureId, GLuint textureUnit) const {
+	glActiveTexture(GL_TEXTURE0 + textureUnit);
+	glBindTexture(GL_TEXTURE_2D, textureId);
+	GLchar samplerName[12];
+	snprintf(samplerName, sizeof(samplerName), "%s%d", "ourTexture", textureUnit);
+	glUniform1i(glGetUniformLocation(shaderProgram, samplerName), textureUnit);
 }
