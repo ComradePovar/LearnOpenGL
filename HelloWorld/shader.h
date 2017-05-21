@@ -20,7 +20,9 @@ public:
 	void use() const;
 	void stop() const;
 
-	void sendTransformationMatrix(const glm::mat4 matrix) const;
+	void sendModelMatrix(const glm::mat4 matrix) const;
+	void sendViewMatrix(const glm::mat4 matrix) const;
+	void sendProjectionMatrix(const glm::mat4 matrix) const;
 	void sendSampler(GLuint textureId, GLuint textureUnit) const;
 	GLuint getShaderProgramId() const;
 };

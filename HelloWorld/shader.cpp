@@ -65,9 +65,19 @@ GLuint Shader::getShaderProgramId() const {
 	return shaderProgram;
 }
 
-void Shader::sendTransformationMatrix(const glm::mat4 matrix) const {
-	GLint transformationMatrixLoc = glGetUniformLocation(shaderProgram, "transformationMatrix");
-	glUniformMatrix4fv(transformationMatrixLoc, 1, GL_FALSE, glm::value_ptr(matrix));
+void Shader::sendModelMatrix(const glm::mat4 matrix) const {
+	GLint modelMatrixLoc = glGetUniformLocation(shaderProgram, "model");
+	glUniformMatrix4fv(modelMatrixLoc, 1, GL_FALSE, glm::value_ptr(matrix));
+}
+
+void Shader::sendViewMatrix(const glm::mat4 matrix) const {
+	GLint viewMatrixLoc = glGetUniformLocation(shaderProgram, "view");
+	glUniformMatrix4fv(viewMatrixLoc, 1, GL_FALSE, glm::value_ptr(matrix));
+}
+
+void Shader::sendProjectionMatrix(const glm::mat4 matrix) const {
+	GLint projectionMatrixLoc = glGetUniformLocation(shaderProgram, "projection");
+	glUniformMatrix4fv(projectionMatrixLoc, 1, GL_FALSE, glm::value_ptr(matrix));
 }
 
 void Shader::sendSampler(GLuint textureId, GLuint textureUnit) const {
