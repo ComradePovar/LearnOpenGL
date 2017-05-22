@@ -7,14 +7,18 @@
 //GLM
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include "shader.h"
 #include "model.h"
 #include "texture.h"
+#include "camera.h"
 
 /*
-	Key callback
+	callbacks
 */
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
+void mouse_callback(GLFWwindow* window, double xpos, double ypos);
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
 /*
 	Initialization
@@ -22,7 +26,15 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 void glfwInitialization();
 GLFWwindow* createWindow(int width, int height, const char* title, GLFWmonitor* monitor, GLFWwindow* share);
 int glewInitialization();
-void sceneInitialization(GLFWwindow* window, GLFWkeyfun cbfun, int& width, int& height);
+void sceneInitialization(GLFWwindow* window, GLFWkeyfun keyFun, GLFWcursorposfun cursorPosFun, GLFWscrollfun scrollFun, int& width, int& height);
+
+void do_movement(GLfloat deltaTime);
+
+bool keys[1024];
+bool firstMove = true;
+double lastX = 0, lastY = 0;
+Camera camera;
+
 
 int main() {
 	glfwInitialization();
@@ -42,7 +54,7 @@ int main() {
 	}
 
 	int width, height;
-	sceneInitialization(window, key_callback, width, height);
+	sceneInitialization(window, key_callback, mouse_callback, scroll_callback, width, height);
 
 	Model* model;
 	Shader* shader;
@@ -74,20 +86,24 @@ int main() {
 		glm::vec3(-1.3f,  1.0f, -1.5f)
 	};
 
+	GLfloat deltaTime = 0.0f;
+	GLfloat lastFrame = 0.0f;
 	while (glfwWindowShouldClose(window) != GL_TRUE) {
+		GLdouble currentFrame = glfwGetTime();
+		deltaTime = currentFrame - lastFrame;
+		lastFrame = currentFrame;
 		glEnable(GL_DEPTH_TEST);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		glfwPollEvents();
-
+		do_movement(deltaTime);
 
 		shader->use();
 		model->bindVAO();
 
-		glm::mat4 viewMatrix;
-		viewMatrix = glm::translate(viewMatrix, glm::vec3(0.0f, 0.0f, -3.0f));
 		glm::mat4 projectionMatrix;
-		projectionMatrix = glm::perspective(45.0f, (float)width / height, 0.1f, 100.0f);
+		projectionMatrix = glm::perspective(glm::radians(camera.zoom), (float)width / height, 0.1f, 100.0f);
+		glm::mat4 viewMatrix = camera.getViewMatrix();
 		shader->sendViewMatrix(viewMatrix);
 		shader->sendProjectionMatrix(projectionMatrix);
 		shader->sendSampler(texture1->getTextureId(), texture1->getTextureUnit());
@@ -97,8 +113,7 @@ int main() {
 		for (int i = 0; i < 10; i++) {
 			glm::mat4 modelMatrix;
 			modelMatrix = glm::translate(modelMatrix, cubePositions[i]);
-			GLfloat angle = i % 3 == 0 ? glm::radians(20.0f * i) : glm::radians(static_cast<float>(glfwGetTime())*30);
-			modelMatrix = glm::rotate(modelMatrix, angle, glm::vec3(1.0f, 0.3f, 0.5f));
+			modelMatrix = glm::rotate(modelMatrix, glm::radians(20.0f * i), glm::vec3(1.0f, 0.3f, 0.5f));
 
 			shader->sendModelMatrix(modelMatrix);
 			//glDrawElements(GL_TRIANGLES, model->getIndicesCount(), GL_UNSIGNED_INT, 0);
@@ -120,6 +135,49 @@ void key_callback(GLFWwindow* window, int keycode, int scancode, int action, int
 	if (keycode == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
 		glfwSetWindowShouldClose(window, GL_TRUE);
 	}
+	if (keycode >= 0 && keycode <= 1024) {
+		if (action == GLFW_PRESS) {
+			keys[keycode] = true;
+		}
+		else if (action == GLFW_RELEASE) {
+			keys[keycode] = false;
+		}
+	}
+}
+
+void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
+	if (firstMove) {
+		lastX = xpos;
+		lastY = ypos;
+		firstMove = false;
+	}
+
+	GLfloat xoffset = static_cast<float>(xpos - lastX);
+	GLfloat yoffset = static_cast<float>(lastY - ypos);
+	lastX = xpos;
+	lastY = ypos;
+
+	camera.processMouseInput(xoffset, yoffset);
+}
+
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+	camera.processScrollInput(yoffset);
+}
+
+void do_movement(GLfloat deltaTime) {
+	if (keys[GLFW_KEY_W]) {
+		camera.processKeyboardInput(FORWARD, deltaTime);
+	}
+	if (keys[GLFW_KEY_S]) {
+		camera.processKeyboardInput(BACKWARD, deltaTime);
+	}
+	if (keys[GLFW_KEY_A]) {
+		camera.processKeyboardInput(LEFT, deltaTime);
+	}
+	if (keys[GLFW_KEY_D]) {
+		camera.processKeyboardInput(RIGHT, deltaTime);
+	}
 }
 
 void glfwInitialization()
@@ -133,7 +191,9 @@ void glfwInitialization()
 
 GLFWwindow* createWindow(int width, int height, const char * title, GLFWmonitor * monitor, GLFWwindow * share)
 {
-	return glfwCreateWindow(width, height, title, monitor, share);
+	GLFWwindow* window = glfwCreateWindow(width, height, title, monitor, share);
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	return window;
 }
 
 int glewInitialization()
@@ -145,7 +205,7 @@ int glewInitialization()
 	return 0;
 }
 
-void sceneInitialization(GLFWwindow* window, GLFWkeyfun cbfun, int& width, int& height)
+void sceneInitialization(GLFWwindow* window, GLFWkeyfun keyFun, GLFWcursorposfun cursorPosFun, GLFWscrollfun scrollFun, int& width, int& height)
 {
 	glfwGetFramebufferSize(window, &width, &height);
 
@@ -153,5 +213,7 @@ void sceneInitialization(GLFWwindow* window, GLFWkeyfun cbfun, int& width, int& 
 	//glClearColor(0.2f, 0.3f, 0.4f, 0.5f);
 	glClearColor(0.0f, 0.25f, 0.0f, 1.0f);
 
-	glfwSetKeyCallback(window, cbfun);
+	glfwSetKeyCallback(window, keyFun);
+	glfwSetCursorPosCallback(window, cursorPosFun);
+	glfwSetScrollCallback(window, scrollFun);
 }
