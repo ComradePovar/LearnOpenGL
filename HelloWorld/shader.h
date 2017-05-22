@@ -13,17 +13,14 @@
 class Shader {
 private:	
 	GLuint shaderProgram;
-
 	GLint createShader(GLenum shaderType, GLuint& shaderId, const GLchar* fileName);
 public:
 	Shader(const GLchar* vertexPath, const GLchar* fragmentPath);
 	void use() const;
 	void stop() const;
 
-	void sendModelMatrix(const glm::mat4 matrix) const;
-	void sendViewMatrix(const glm::mat4 matrix) const;
-	void sendProjectionMatrix(const glm::mat4 matrix) const;
-	void sendSampler(GLuint textureId, GLuint textureUnit) const;
+	void sendMatrix4(const GLchar* uniformName, glm::mat4 matrix) const;
+	void sendVector3(const GLchar* uniformName, glm::vec3 vector) const;
 	GLuint getShaderProgramId() const;
 };
 

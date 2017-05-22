@@ -2,7 +2,7 @@
 
 Camera::Camera() : front(glm::vec3(0.0f, 0.0f, 1.0f)), movementSpeed(SPEED),
 				   sensitivity(SENSITIVITY), zoom(ZOOM), pitch(PITCH), yaw(YAW) {
-	this->position = glm::vec3(0.0f, 0.0f, 0.0f);
+	this->position = glm::vec3(0.0f, 0.0f, 3.0f);
 	this->upVector = glm::vec3(0.0f, 1.0f, 0.0f);
 	updateCameraVectors();
 }
@@ -33,6 +33,7 @@ void Camera::processMouseInput(GLfloat xoffset, GLfloat yoffset) {
 	if (pitch < -89.0f) {
 		pitch = -89.0f;
 	}
+
 	updateCameraVectors();
 }
 
@@ -66,5 +67,4 @@ void Camera::updateCameraVectors() {
 	this->front = glm::normalize(front);
 
 	this->right = glm::normalize(glm::cross(this->front, upVector));
-	this->upVector = glm::normalize(glm::cross(this->right, this->front));
 }

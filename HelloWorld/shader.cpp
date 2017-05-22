@@ -65,25 +65,12 @@ GLuint Shader::getShaderProgramId() const {
 	return shaderProgram;
 }
 
-void Shader::sendModelMatrix(const glm::mat4 matrix) const {
-	GLint modelMatrixLoc = glGetUniformLocation(shaderProgram, "model");
-	glUniformMatrix4fv(modelMatrixLoc, 1, GL_FALSE, glm::value_ptr(matrix));
+void Shader::sendMatrix4(const GLchar* uniformName, const glm::mat4 matrix) const {
+	GLint matrixLoc = glGetUniformLocation(shaderProgram, uniformName);
+	glUniformMatrix4fv(matrixLoc, 1, GL_FALSE, glm::value_ptr(matrix));
 }
 
-void Shader::sendViewMatrix(const glm::mat4 matrix) const {
-	GLint viewMatrixLoc = glGetUniformLocation(shaderProgram, "view");
-	glUniformMatrix4fv(viewMatrixLoc, 1, GL_FALSE, glm::value_ptr(matrix));
-}
-
-void Shader::sendProjectionMatrix(const glm::mat4 matrix) const {
-	GLint projectionMatrixLoc = glGetUniformLocation(shaderProgram, "projection");
-	glUniformMatrix4fv(projectionMatrixLoc, 1, GL_FALSE, glm::value_ptr(matrix));
-}
-
-void Shader::sendSampler(GLuint textureId, GLuint textureUnit) const {
-	glActiveTexture(GL_TEXTURE0 + textureUnit);
-	glBindTexture(GL_TEXTURE_2D, textureId);
-	GLchar samplerName[12];
-	snprintf(samplerName, sizeof(samplerName), "%s%d", "ourTexture", textureUnit);
-	glUniform1i(glGetUniformLocation(shaderProgram, samplerName), textureUnit);
+void Shader::sendVector3(const GLchar* uniformName, const glm::vec3 vector) const {
+	GLint vectorLoc = glGetUniformLocation(shaderProgram, uniformName);
+	glUniform3fv(vectorLoc, 1, glm::value_ptr(vector));
 }

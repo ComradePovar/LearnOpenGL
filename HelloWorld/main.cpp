@@ -35,6 +35,51 @@ bool firstMove = true;
 double lastX = 0, lastY = 0;
 Camera camera;
 
+const GLint N = 108;
+const GLint VERTICES_COUNT = 36;
+const GLfloat verticesData[N] = {
+	-0.5f, -0.5f, -0.5f,
+	0.5f, -0.5f, -0.5f,
+	0.5f,  0.5f, -0.5f,
+	0.5f,  0.5f, -0.5f,
+	-0.5f,  0.5f, -0.5f,
+	-0.5f, -0.5f, -0.5f,
+
+	-0.5f, -0.5f,  0.5f,
+	0.5f, -0.5f,  0.5f,
+	0.5f,  0.5f,  0.5f,
+	0.5f,  0.5f,  0.5f,
+	-0.5f,  0.5f,  0.5f,
+	-0.5f, -0.5f,  0.5f,
+
+	-0.5f,  0.5f,  0.5f,
+	-0.5f,  0.5f, -0.5f,
+	-0.5f, -0.5f, -0.5f,
+	-0.5f, -0.5f, -0.5f,
+	-0.5f, -0.5f,  0.5f,
+	-0.5f,  0.5f,  0.5f,
+
+	0.5f,  0.5f,  0.5f,
+	0.5f,  0.5f, -0.5f,
+	0.5f, -0.5f, -0.5f,
+	0.5f, -0.5f, -0.5f,
+	0.5f, -0.5f,  0.5f,
+	0.5f,  0.5f,  0.5f,
+
+	-0.5f, -0.5f, -0.5f,
+	0.5f, -0.5f, -0.5f,
+	0.5f, -0.5f,  0.5f,
+	0.5f, -0.5f,  0.5f,
+	-0.5f, -0.5f,  0.5f,
+	-0.5f, -0.5f, -0.5f,
+
+	-0.5f,  0.5f, -0.5f,
+	0.5f,  0.5f, -0.5f,
+	0.5f,  0.5f,  0.5f,
+	0.5f,  0.5f,  0.5f,
+	-0.5f,  0.5f,  0.5f,
+	-0.5f,  0.5f, -0.5f,
+};
 
 int main() {
 	glfwInitialization();
@@ -55,15 +100,19 @@ int main() {
 
 	int width, height;
 	sceneInitialization(window, key_callback, mouse_callback, scroll_callback, width, height);
-
-	Model* model;
+	const GLfloat ar[2] { 0.5f, 0.2f };
+	Model* cube;
+	Model* lightSource;
 	Shader* shader;
+	Shader* lightSourceShader;
 	Texture* texture1;
 	Texture* texture2;
 	Texture* texture3;
 	try {
 		shader = new Shader("Shaders/shader.vert", "Shaders/shader.frag");
-		model  = new Model();
+		lightSourceShader = new Shader("Shaders/lightSourceShader.vert", "Shaders/lightSourceShader.frag");
+		cube = new Model(vertices, N, VERTICES_COUNT);
+		lightSource = new Model(vertices, N, VERTICES_COUNT);
 		texture1 = new Texture("Textures/container.jpg");
 		texture2 = new Texture("Textures/awesomeface.png");
 		texture3 = new Texture("Textures/epifan.jpg");
@@ -88,41 +137,46 @@ int main() {
 
 	GLfloat deltaTime = 0.0f;
 	GLfloat lastFrame = 0.0f;
+
+	glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
+	glm::vec3 objectColor(1.0f, 0.5f, 0.31f);
+	glm::vec3 lightPosition(1.2f, 1.0f, 2.0f);
 	while (glfwWindowShouldClose(window) != GL_TRUE) {
 		GLdouble currentFrame = glfwGetTime();
 		deltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
-		glEnable(GL_DEPTH_TEST);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		glfwPollEvents();
 		do_movement(deltaTime);
 
 		shader->use();
-		model->bindVAO();
+		cube->bindVAO();
 
 		glm::mat4 projectionMatrix;
 		projectionMatrix = glm::perspective(glm::radians(camera.zoom), (float)width / height, 0.1f, 100.0f);
 		glm::mat4 viewMatrix = camera.getViewMatrix();
-		shader->sendViewMatrix(viewMatrix);
-		shader->sendProjectionMatrix(projectionMatrix);
-		shader->sendSampler(texture1->getTextureId(), texture1->getTextureUnit());
-		shader->sendSampler(texture2->getTextureId(), texture2->getTextureUnit());
-		shader->sendSampler(texture3->getTextureId(), texture3->getTextureUnit());
+		glm::mat4 modelMatrix;
+		shader->sendMatrix4("model", modelMatrix);
+		shader->sendMatrix4("view", viewMatrix);
+		shader->sendMatrix4("projection", projectionMatrix);
+		shader->sendVector3("lightColor", lightColor);
+		shader->sendVector3("objectColor", objectColor);
+		glDrawArrays(GL_TRIANGLES, 0, cube->getVerticesCount());
 
-		for (int i = 0; i < 10; i++) {
-			glm::mat4 modelMatrix;
-			modelMatrix = glm::translate(modelMatrix, cubePositions[i]);
-			modelMatrix = glm::rotate(modelMatrix, glm::radians(20.0f * i), glm::vec3(1.0f, 0.3f, 0.5f));
+		lightSource->bindVAO();
+		lightSourceShader->use();
 
-			shader->sendModelMatrix(modelMatrix);
-			//glDrawElements(GL_TRIANGLES, model->getIndicesCount(), GL_UNSIGNED_INT, 0);
-			glDrawArrays(GL_TRIANGLES, 0, model->getVerticesCount());
-		}
+		modelMatrix = glm::mat4();
+		modelMatrix = glm::translate(modelMatrix, lightPosition);
+		modelMatrix = glm::scale(modelMatrix, glm::vec3(0.2f));
+		lightSourceShader->sendMatrix4("model", modelMatrix);
+		lightSourceShader->sendMatrix4("view", viewMatrix);
+		lightSourceShader->sendMatrix4("projection", projectionMatrix);
+		
+		glDrawArrays(GL_TRIANGLES, 0, lightSource->getVerticesCount());
 
-		shader->stop();
-		model->unbindVAO();
-
+		lightSource->unbindVAO();
+		lightSourceShader->stop();
 
 		glfwSwapBuffers(window);
 	}
@@ -216,4 +270,6 @@ void sceneInitialization(GLFWwindow* window, GLFWkeyfun keyFun, GLFWcursorposfun
 	glfwSetKeyCallback(window, keyFun);
 	glfwSetCursorPosCallback(window, cursorPosFun);
 	glfwSetScrollCallback(window, scrollFun);
+	glEnable(GL_DEPTH_TEST);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }

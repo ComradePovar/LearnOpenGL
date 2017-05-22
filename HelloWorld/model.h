@@ -11,7 +11,7 @@ private:
 	GLsizei verticesCount;
 	GLsizei indicesCount;
 public:
-	Model();
+	Model(const GLfloat* verticesData, const GLint n, const GLint verticesCount);
 	void bindVAO() const;
 	void unbindVAO() const;
 	GLsizei getVerticesCount() const;
