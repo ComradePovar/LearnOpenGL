@@ -74,3 +74,8 @@ void Shader::sendVector3(const GLchar* uniformName, const glm::vec3 vector) cons
 	GLint vectorLoc = glGetUniformLocation(shaderProgram, uniformName);
 	glUniform3fv(vectorLoc, 1, glm::value_ptr(vector));
 }
+
+void Shader::sendMatrix3(const GLchar* uniformName, const glm::mat3 matrix) const {
+	GLint matrixLoc = glGetUniformLocation(shaderProgram, uniformName);
+	glUniformMatrix3fv(matrixLoc, 1, GL_FALSE, glm::value_ptr(matrix));
+}

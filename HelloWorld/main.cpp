@@ -35,52 +35,54 @@ bool firstMove = true;
 double lastX = 0, lastY = 0;
 Camera camera;
 
-const GLint N = 108;
+const GLint N = 216;
 const GLint VERTICES_COUNT = 36;
-const GLfloat verticesData[N] = {
-	-0.5f, -0.5f, -0.5f,
-	0.5f, -0.5f, -0.5f,
-	0.5f,  0.5f, -0.5f,
-	0.5f,  0.5f, -0.5f,
-	-0.5f,  0.5f, -0.5f,
-	-0.5f, -0.5f, -0.5f,
+const GLfloat verticesData[] = {
+	-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+	0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+	0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+	0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+	-0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+	-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
 
-	-0.5f, -0.5f,  0.5f,
-	0.5f, -0.5f,  0.5f,
-	0.5f,  0.5f,  0.5f,
-	0.5f,  0.5f,  0.5f,
-	-0.5f,  0.5f,  0.5f,
-	-0.5f, -0.5f,  0.5f,
+	-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+	0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+	0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+	0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+	-0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+	-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
 
-	-0.5f,  0.5f,  0.5f,
-	-0.5f,  0.5f, -0.5f,
-	-0.5f, -0.5f, -0.5f,
-	-0.5f, -0.5f, -0.5f,
-	-0.5f, -0.5f,  0.5f,
-	-0.5f,  0.5f,  0.5f,
+	-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+	-0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+	-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+	-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+	-0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+	-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
 
-	0.5f,  0.5f,  0.5f,
-	0.5f,  0.5f, -0.5f,
-	0.5f, -0.5f, -0.5f,
-	0.5f, -0.5f, -0.5f,
-	0.5f, -0.5f,  0.5f,
-	0.5f,  0.5f,  0.5f,
+	0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+	0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+	0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+	0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+	0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+	0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
 
-	-0.5f, -0.5f, -0.5f,
-	0.5f, -0.5f, -0.5f,
-	0.5f, -0.5f,  0.5f,
-	0.5f, -0.5f,  0.5f,
-	-0.5f, -0.5f,  0.5f,
-	-0.5f, -0.5f, -0.5f,
+	-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+	0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+	0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+	0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+	-0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+	-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
 
-	-0.5f,  0.5f, -0.5f,
-	0.5f,  0.5f, -0.5f,
-	0.5f,  0.5f,  0.5f,
-	0.5f,  0.5f,  0.5f,
-	-0.5f,  0.5f,  0.5f,
-	-0.5f,  0.5f, -0.5f,
+	-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+	0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+	0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+	0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+	-0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+	-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
 };
 
+glm::vec3 lightPosition(1.2f, 1.0f, 2.0f);
+float angleLightPosition;
 int main() {
 	glfwInitialization();
 
@@ -111,8 +113,8 @@ int main() {
 	try {
 		shader = new Shader("Shaders/shader.vert", "Shaders/shader.frag");
 		lightSourceShader = new Shader("Shaders/lightSourceShader.vert", "Shaders/lightSourceShader.frag");
-		cube = new Model(vertices, N, VERTICES_COUNT);
-		lightSource = new Model(vertices, N, VERTICES_COUNT);
+		cube = new Model(verticesData, N);
+		lightSource = new Model(verticesData, N);
 		texture1 = new Texture("Textures/container.jpg");
 		texture2 = new Texture("Textures/awesomeface.png");
 		texture3 = new Texture("Textures/epifan.jpg");
@@ -140,7 +142,6 @@ int main() {
 
 	glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
 	glm::vec3 objectColor(1.0f, 0.5f, 0.31f);
-	glm::vec3 lightPosition(1.2f, 1.0f, 2.0f);
 	while (glfwWindowShouldClose(window) != GL_TRUE) {
 		GLdouble currentFrame = glfwGetTime();
 		deltaTime = currentFrame - lastFrame;
@@ -149,13 +150,34 @@ int main() {
 		glfwPollEvents();
 		do_movement(deltaTime);
 
-		shader->use();
-		cube->bindVAO();
+		lightSourceShader->use();
+		lightSource->bindVAO();
 
 		glm::mat4 projectionMatrix;
 		projectionMatrix = glm::perspective(glm::radians(camera.zoom), (float)width / height, 0.1f, 100.0f);
 		glm::mat4 viewMatrix = camera.getViewMatrix();
 		glm::mat4 modelMatrix;
+		glm::mat3 normalMatrix;
+
+		modelMatrix = glm::mat4();
+		modelMatrix = glm::rotate(modelMatrix, glm::radians(angleLightPosition), glm::vec3(-1.0f, 0.0f, 1.0f));
+		modelMatrix = glm::translate(modelMatrix, lightPosition);
+		modelMatrix = glm::scale(modelMatrix, glm::vec3(0.2f));
+		lightSourceShader->sendMatrix4("model", modelMatrix);
+		lightSourceShader->sendMatrix4("view", viewMatrix);
+		lightSourceShader->sendMatrix4("projection", projectionMatrix);
+
+		glDrawArrays(GL_TRIANGLES, 0, lightSource->getVerticesCount());
+
+		glm::vec3 lightPositionCurrent = glm::vec3(modelMatrix * glm::vec4(lightPosition, 1.0f));
+		shader->use();
+		cube->bindVAO();
+
+		modelMatrix = glm::mat4();
+		normalMatrix = glm::transpose(glm::inverse(modelMatrix));
+		shader->sendMatrix3("normalMatrix", normalMatrix);
+		shader->sendVector3("viewPos", camera.position);
+		shader->sendVector3("lightPos", lightPositionCurrent);
 		shader->sendMatrix4("model", modelMatrix);
 		shader->sendMatrix4("view", viewMatrix);
 		shader->sendMatrix4("projection", projectionMatrix);
@@ -163,20 +185,8 @@ int main() {
 		shader->sendVector3("objectColor", objectColor);
 		glDrawArrays(GL_TRIANGLES, 0, cube->getVerticesCount());
 
-		lightSource->bindVAO();
-		lightSourceShader->use();
-
-		modelMatrix = glm::mat4();
-		modelMatrix = glm::translate(modelMatrix, lightPosition);
-		modelMatrix = glm::scale(modelMatrix, glm::vec3(0.2f));
-		lightSourceShader->sendMatrix4("model", modelMatrix);
-		lightSourceShader->sendMatrix4("view", viewMatrix);
-		lightSourceShader->sendMatrix4("projection", projectionMatrix);
-		
-		glDrawArrays(GL_TRIANGLES, 0, lightSource->getVerticesCount());
-
-		lightSource->unbindVAO();
-		lightSourceShader->stop();
+		cube->unbindVAO();
+		shader->stop();
 
 		glfwSwapBuffers(window);
 	}
@@ -220,6 +230,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 }
 
 void do_movement(GLfloat deltaTime) {
+	float rotationSpeed = 40.0f * deltaTime;
 	if (keys[GLFW_KEY_W]) {
 		camera.processKeyboardInput(FORWARD, deltaTime);
 	}
@@ -231,6 +242,12 @@ void do_movement(GLfloat deltaTime) {
 	}
 	if (keys[GLFW_KEY_D]) {
 		camera.processKeyboardInput(RIGHT, deltaTime);
+	}
+	if (keys[GLFW_KEY_UP]) {
+		angleLightPosition += rotationSpeed;
+	}
+	if (keys[GLFW_KEY_DOWN]) {
+		angleLightPosition += rotationSpeed;
 	}
 }
 
