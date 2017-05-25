@@ -1,15 +1,13 @@
-#include <iostream>
-#include <GL\glew.h>
 #include "shader.h"
 
-Shader::Shader() {
+Shader::Shader(const GLchar* vertexPath, const GLchar* fragmentPath) {
 	GLuint vertexShader, fragmentShader;
-	if (!createShader(GL_VERTEX_SHADER, vertexShader)) {
+	if (!createShader(GL_VERTEX_SHADER, vertexShader, vertexPath)) {
 		GLchar infoLog[512];
 		glGetShaderInfoLog(vertexShader, 512, nullptr, infoLog);
 		throw std::exception(infoLog);
 	}
-	if (!createShader(GL_FRAGMENT_SHADER, fragmentShader)) {
+	if (!createShader(GL_FRAGMENT_SHADER, fragmentShader, fragmentPath)) {
 		GLchar infoLog[512];
 		glGetShaderInfoLog(fragmentShader, 512, nullptr, infoLog);
 		throw std::exception(infoLog);
@@ -32,19 +30,21 @@ Shader::Shader() {
 	glDeleteShader(fragmentShader);
 }
 
-GLint Shader::createShader(GLenum shaderType, GLuint& shaderId) {
+GLint Shader::createShader(GLenum shaderType, GLuint& shaderId, const GLchar* fileName) {
+	std::string shaderSource;
+	std::ifstream shaderFile;
+	shaderFile.exceptions(std::ifstream::badbit | std::ifstream::failbit);
+	shaderFile.open(fileName);
+
+	std::stringstream shaderStream;
+	shaderStream << shaderFile.rdbuf();
+	shaderSource = shaderStream.str();
+
+	shaderFile.close();
+	const GLchar* shaderCode = shaderSource.c_str();
 
 	shaderId = glCreateShader(shaderType);
-	switch (shaderType) {
-		case GL_VERTEX_SHADER:
-			glShaderSource(shaderId, 1, &vertexShaderSource, nullptr);
-			break;
-		case GL_FRAGMENT_SHADER:
-			glShaderSource(shaderId, 1, &fragmentShaderSource, nullptr);
-			break;
-		default:
-			return -1;
-	}
+	glShaderSource(shaderId, 1, &shaderCode, nullptr);
 	glCompileShader(shaderId);
 
 	GLint compileStatus;
@@ -53,10 +53,24 @@ GLint Shader::createShader(GLenum shaderType, GLuint& shaderId) {
 	return compileStatus;
 }
 
-void Shader::use() {
+void Shader::use() const {
 	glUseProgram(shaderProgram);
 }
 
-void Shader::stop() {
+void Shader::stop() const {
 	glUseProgram(0);
+}
+
+GLuint Shader::getShaderProgramId() const {
+	return shaderProgram;
+}
+
+void Shader::sendMatrix4(const GLchar* uniformName, const glm::mat4 matrix) const {
+	GLint matrixLoc = glGetUniformLocation(shaderProgram, uniformName);
+	glUniformMatrix4fv(matrixLoc, 1, GL_FALSE, glm::value_ptr(matrix));
+}
+
+void Shader::sendVector3(const GLchar* uniformName, const glm::vec3 vector) const {
+	GLint vectorLoc = glGetUniformLocation(shaderProgram, uniformName);
+	glUniform3fv(vectorLoc, 1, glm::value_ptr(vector));
 }

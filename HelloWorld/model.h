@@ -1,4 +1,8 @@
-#pragma once
+#ifndef MODEL_H
+#define MODEL_H
+#define GLEW_STATIC
+#include <GL\glew.h>
+
 class Model {
 private:
 	GLuint VAO;
@@ -7,9 +11,11 @@ private:
 	GLsizei verticesCount;
 	GLsizei indicesCount;
 public:
-	Model();
-	void bindVAO();
-	void unbindVAO();
-	GLsizei getVerticesCount();
-	GLsizei getIndicesCount();
+	Model(const GLfloat* verticesData, const GLint n, const GLint verticesCount);
+	void bindVAO() const;
+	void unbindVAO() const;
+	GLsizei getVerticesCount() const;
+	GLsizei getIndicesCount() const;
 };
+
+#endif
