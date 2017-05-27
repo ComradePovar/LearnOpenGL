@@ -27,6 +27,7 @@ void glfwInitialization();
 GLFWwindow* createWindow(int width, int height, const char* title, GLFWmonitor* monitor, GLFWwindow* share);
 int glewInitialization();
 void sceneInitialization(GLFWwindow* window, GLFWkeyfun keyFun, GLFWcursorposfun cursorPosFun, GLFWscrollfun scrollFun, int& width, int& height);
+void initModelShader(const Shader* shader);
 
 void do_movement(GLfloat deltaTime);
 
@@ -83,6 +84,8 @@ const GLfloat verticesData[] = {
 
 glm::vec3 lightPosition(1.2f, 1.0f, 2.0f);
 float angleLightPosition;
+
+
 int main() {
 	glfwInitialization();
 
@@ -140,8 +143,8 @@ int main() {
 	GLfloat deltaTime = 0.0f;
 	GLfloat lastFrame = 0.0f;
 
-	glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
-	glm::vec3 objectColor(1.0f, 0.5f, 0.31f);
+
+	initModelShader(shader);
 	while (glfwWindowShouldClose(window) != GL_TRUE) {
 		GLdouble currentFrame = glfwGetTime();
 		deltaTime = currentFrame - lastFrame;
@@ -177,12 +180,10 @@ int main() {
 		normalMatrix = glm::transpose(glm::inverse(modelMatrix));
 		shader->sendMatrix3("normalMatrix", normalMatrix);
 		shader->sendVector3("viewPos", camera.position);
-		shader->sendVector3("lightPos", lightPositionCurrent);
+		shader->sendVector3("light.position", lightPositionCurrent);
 		shader->sendMatrix4("model", modelMatrix);
 		shader->sendMatrix4("view", viewMatrix);
 		shader->sendMatrix4("projection", projectionMatrix);
-		shader->sendVector3("lightColor", lightColor);
-		shader->sendVector3("objectColor", objectColor);
 		glDrawArrays(GL_TRIANGLES, 0, cube->getVerticesCount());
 
 		cube->unbindVAO();
@@ -247,7 +248,7 @@ void do_movement(GLfloat deltaTime) {
 		angleLightPosition += rotationSpeed;
 	}
 	if (keys[GLFW_KEY_DOWN]) {
-		angleLightPosition += rotationSpeed;
+		angleLightPosition -= rotationSpeed;
 	}
 }
 
@@ -289,4 +290,18 @@ void sceneInitialization(GLFWwindow* window, GLFWkeyfun keyFun, GLFWcursorposfun
 	glfwSetScrollCallback(window, scrollFun);
 	glEnable(GL_DEPTH_TEST);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+}
+
+void initModelShader(const Shader* shader) {
+	shader->use();
+	shader->sendFloat("material.shininess", 32.0f);
+	shader->sendVector3("material.ambient", glm::vec3(1.0f, 0.5f, 0.31f));
+	shader->sendVector3("material.diffuse", glm::vec3(1.0f, 0.5f, 0.31f));
+	shader->sendVector3("material.specular", glm::vec3(0.5f, 0.5f, 0.5f));
+	shader->sendVector3("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
+
+	shader->sendVector3("light.ambient", glm::vec3(0.2f, 0.2f, 0.2f));
+	shader->sendVector3("light.diffuse", glm::vec3(0.5f, 0.5f, 0.5f));
+	shader->sendVector3("light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
+	shader->stop();
 }
