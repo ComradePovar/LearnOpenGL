@@ -1,20 +1,8 @@
 #include "model.h"
 
 Model::Model(const GLfloat* verticesData, const GLint n) {
-	//GLfloat vertices[] = {
-	//	// Positions         Colors             Texture Coordinates
-	//	0.5f,  0.5f, 0.0f,  1.0f, 0.0f, 0.0f,   1.0f, 1.0f,       // Top Right
-	//    0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,   1.0f, 0.0f,       // Bottom Right
-	//   -0.5f, -0.5f, 0.0f,  0.0f, 0.0f, 1.0f,   0.0f, 0.0f,       // Bottom Left
-	//   -0.5f,  0.5f, 0.0f,  1.0f, 1.0f, 0.0f,   0.0f, 1.0f        // Top Left
-	//};
-	GLuint indices[] = {
-		0, 1, 3,
-		1, 2, 3
-	};
 
 	this->verticesCount = 36;
-	indicesCount = 6;
 
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
@@ -40,10 +28,6 @@ Model::Model(const GLfloat* verticesData, const GLint n) {
 
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(6 * sizeof(GLfloat)));
 	glEnableVertexAttribArray(2);
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 	
 	glBindVertexArray(0);
 }

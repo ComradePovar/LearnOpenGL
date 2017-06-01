@@ -27,7 +27,7 @@ void glfwInitialization();
 GLFWwindow* createWindow(int width, int height, const char* title, GLFWmonitor* monitor, GLFWwindow* share);
 int glewInitialization();
 void sceneInitialization(GLFWwindow* window, GLFWkeyfun keyFun, GLFWcursorposfun cursorPosFun, GLFWscrollfun scrollFun, int& width, int& height);
-void initModelShader(const Shader* shader, const Texture* texture1, const Texture* texture2);
+void initModelShader(const Shader* shader, Texture** textures);
 
 void do_movement(GLfloat deltaTime);
 
@@ -113,6 +113,7 @@ int main() {
 	Shader* lightSourceShader;
 	Texture* containerTexture;
 	Texture* containerTextureSpecular;
+	Texture** textures = new Texture*[2];
 	try {
 		shader = new Shader("Shaders/shader.vert", "Shaders/shader.frag");
 		lightSourceShader = new Shader("Shaders/lightSourceShader.vert", "Shaders/lightSourceShader.frag");
@@ -120,6 +121,9 @@ int main() {
 		lightSource = new Model(verticesData, N);
 		containerTexture = new Texture("Textures/container2.png");
 		containerTextureSpecular = new Texture("Textures/container2_specular.png");
+
+		textures[0] = containerTexture;
+		textures[1] = containerTextureSpecular;
 	}
 	catch (std::exception ex) {
 		std::cout << ex.what();
@@ -143,7 +147,7 @@ int main() {
 	GLfloat lastFrame = 0.0f;
 
 
-	initModelShader(shader, containerTexture, containerTextureSpecular);
+	initModelShader(shader, textures);
 	while (glfwWindowShouldClose(window) != GL_TRUE) {
 		GLdouble currentFrame = glfwGetTime();
 		deltaTime = currentFrame - lastFrame;
@@ -291,13 +295,13 @@ void sceneInitialization(GLFWwindow* window, GLFWkeyfun keyFun, GLFWcursorposfun
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
-void initModelShader(const Shader* shader, const Texture* texture1, const Texture* texture2) {
+void initModelShader(const Shader* shader, Texture** textures) {
 	shader->use();
 	shader->sendFloat("material.shininess", 64.0f);
-	texture1->bindTexture();
-	shader->sendInt("material.diffuse", texture1->getTextureUnit());
-	texture2->bindTexture();
-	shader->sendInt("material.specular", texture2->getTextureUnit());
+	textures[0]->bindTexture();
+	shader->sendInt("material.diffuse", textures[0]->getTextureUnit());
+	textures[1]->bindTexture();
+	shader->sendInt("material.specular", textures[1]->getTextureUnit());
 	shader->sendVector3("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
 
 	shader->sendVector3("light.ambient", glm::vec3(0.2f, 0.2f, 0.2f));
