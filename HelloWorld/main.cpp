@@ -179,15 +179,27 @@ int main() {
 		shader->use();
 		cube->bindVAO();
 
-		modelMatrix = glm::mat4();
-		normalMatrix = glm::transpose(glm::inverse(modelMatrix));
 		shader->sendMatrix3("normalMatrix", normalMatrix);
 		shader->sendVector3("viewPos", camera.position);
-		shader->sendVector3("light.position", lightPositionCurrent);
+		shader->sendVector3("light.direction", glm::vec3(-0.2f, -1.0f, -0.3f));//lightPositionCurrent);
 		shader->sendMatrix4("model", modelMatrix);
 		shader->sendMatrix4("view", viewMatrix);
 		shader->sendMatrix4("projection", projectionMatrix);
-		glDrawArrays(GL_TRIANGLES, 0, cube->getVerticesCount());
+
+		for (int i = 0; i < 10; i++) {
+			glm::mat4 modelMatrix, normalMatrix;
+			modelMatrix = glm::translate(modelMatrix, cubePositions[i]);
+			float angle = 20 * i;
+			modelMatrix = glm::rotate(modelMatrix, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+
+			normalMatrix = glm::transpose(glm::inverse(modelMatrix));
+			shader->sendMatrix4("model", modelMatrix);
+			shader->sendMatrix4("normalMatrix", normalMatrix);
+
+
+			normalMatrix = glm::transpose(glm::inverse(modelMatrix));
+			glDrawArrays(GL_TRIANGLES, 0, cube->getVerticesCount());
+		}
 
 		cube->unbindVAO();
 		shader->stop();
