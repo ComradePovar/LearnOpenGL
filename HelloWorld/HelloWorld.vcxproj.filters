@@ -78,5 +78,11 @@
     <Image Include="Textures\epifan.jpg">
       <Filter>Resource Files\Textures</Filter>
     </Image>
+    <Image Include="Textures\container2.png">
+      <Filter>Resource Files\Textures</Filter>
+    </Image>
+    <Image Include="Textures\container2_specular.png">
+      <Filter>Resource Files\Textures</Filter>
+    </Image>
   </ItemGroup>
 </Project>

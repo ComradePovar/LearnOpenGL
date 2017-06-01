@@ -80,7 +80,12 @@ void Shader::sendMatrix3(const GLchar* uniformName, const glm::mat3 matrix) cons
 	glUniformMatrix3fv(matrixLoc, 1, GL_FALSE, glm::value_ptr(matrix));
 }
 
-void Shader::sendFloat(const GLchar* uniformName, const float value) const {
+void Shader::sendFloat(const GLchar* uniformName, const GLfloat value) const {
 	GLint floatLoc = glGetUniformLocation(shaderProgram, uniformName);
 	glUniform1f(floatLoc, value);
+}
+
+void Shader::sendInt(const GLchar* uniformName, const GLint value) const {
+	GLint intLoc = glGetUniformLocation(shaderProgram, uniformName);
+	glUniform1i(intLoc, value);
 }

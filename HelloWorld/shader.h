@@ -22,7 +22,8 @@ public:
 	void sendMatrix4(const GLchar* uniformName, glm::mat4 matrix) const;
 	void sendMatrix3(const GLchar* uniformName, glm::mat3 matrix) const;
 	void sendVector3(const GLchar* uniformName, glm::vec3 vector) const;
-	void sendFloat(const GLchar* uniformName, const float value) const;
+	void sendInt(const GLchar* uniformName, const GLint value) const;
+	void sendFloat(const GLchar* uniformName, const GLfloat value) const;
 	GLuint getShaderProgramId() const;
 };
 
