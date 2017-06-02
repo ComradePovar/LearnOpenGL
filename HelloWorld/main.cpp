@@ -143,6 +143,12 @@ int main() {
 		glm::vec3(-1.3f,  1.0f, -1.5f)
 	};
 
+	glm::vec3 pointLightPositions[] = {
+		glm::vec3(0.7f,  0.2f,  2.0f),
+		glm::vec3(2.3f, -3.3f, -4.0f),
+		glm::vec3(-4.0f,  2.0f, -12.0f),
+		glm::vec3(0.0f,  0.0f, -3.0f)
+	};
 	GLfloat deltaTime = 0.0f;
 	GLfloat lastFrame = 0.0f;
 
@@ -165,15 +171,17 @@ int main() {
 		glm::mat4 modelMatrix;
 		glm::mat3 normalMatrix;
 
+		lightSourceShader->sendMatrix4("view", viewMatrix);
+		lightSourceShader->sendMatrix4("projection", projectionMatrix);
+
 		modelMatrix = glm::mat4();
 		modelMatrix = glm::rotate(modelMatrix, glm::radians(angleLightPosition), glm::vec3(-1.0f, 0.0f, 1.0f));
 		modelMatrix = glm::translate(modelMatrix, lightPosition);
 		modelMatrix = glm::scale(modelMatrix, glm::vec3(0.2f));
 		lightSourceShader->sendMatrix4("model", modelMatrix);
-		lightSourceShader->sendMatrix4("view", viewMatrix);
-		lightSourceShader->sendMatrix4("projection", projectionMatrix);
 
 		glDrawArrays(GL_TRIANGLES, 0, lightSource->getVerticesCount());
+
 
 		glm::vec3 lightPositionCurrent = glm::vec3(modelMatrix * glm::vec4(lightPosition, 1.0f));
 		shader->use();
@@ -181,7 +189,10 @@ int main() {
 
 		shader->sendMatrix3("normalMatrix", normalMatrix);
 		shader->sendVector3("viewPos", camera.position);
-		shader->sendVector3("light.direction", glm::vec3(-0.2f, -1.0f, -0.3f));//lightPositionCurrent);
+		shader->sendVector3("dirLight.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
+		shader->sendVector3("pointLights[0].position", lightPositionCurrent);
+		shader->sendVector3("spotlight.position", camera.position);
+		shader->sendVector3("spotlight.direction", camera.front);
 		shader->sendMatrix4("model", modelMatrix);
 		shader->sendMatrix4("view", viewMatrix);
 		shader->sendMatrix4("projection", projectionMatrix);
@@ -316,8 +327,20 @@ void initModelShader(const Shader* shader, Texture** textures) {
 	shader->sendInt("material.specular", textures[1]->getTextureUnit());
 	shader->sendVector3("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
 
-	shader->sendVector3("light.ambient", glm::vec3(0.2f, 0.2f, 0.2f));
-	shader->sendVector3("light.diffuse", glm::vec3(0.5f, 0.5f, 0.5f));
-	shader->sendVector3("light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
+	shader->sendVector3("dirLight.ambient", glm::vec3(0.2f, 0.2f, 0.2f));
+	shader->sendVector3("dirLight.diffuse", glm::vec3(0.5f, 0.5f, 0.5f));
+	shader->sendVector3("dirLight.specular", glm::vec3(1.0f, 1.0f, 1.0f));
+
+	shader->sendVector3("pointLights[0].ambient", glm::vec3(0.2f, 0.2f, 0.2f));
+	shader->sendVector3("pointLights[0].diffuse", glm::vec3(0.5f, 0.5f, 0.5f));
+	shader->sendVector3("pointLights[0].specular", glm::vec3(1.0f, 1.0f, 1.0f));
+	shader->sendFloat("pointLights[0].constant", 1.0f);
+	shader->sendFloat("pointLights[0].linear", 0.09f);
+	shader->sendFloat("pointLights[0].quadratic", 0.032f);
+
+	shader->sendFloat("spotlight.cutOff", glm::cos(glm::radians(12.5f)));
+	shader->sendVector3("spotlight.ambient", glm::vec3(0.2f, 0.2f, 0.2f));
+	shader->sendVector3("spotlight.diffuse", glm::vec3(0.5f, 0.5f, 0.5f));
+	shader->sendVector3("spotlight.specular", glm::vec3(1.0f, 1.0f, 1.0f));
 	shader->stop();
 }
