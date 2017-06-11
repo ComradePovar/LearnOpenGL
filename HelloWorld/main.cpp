@@ -10,7 +10,6 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "shader.h"
 #include "model.h"
-#include "texture.h"
 #include "camera.h"
 
 /*
@@ -27,7 +26,6 @@ void glfwInitialization();
 GLFWwindow* createWindow(int width, int height, const char* title, GLFWmonitor* monitor, GLFWwindow* share);
 int glewInitialization();
 void sceneInitialization(GLFWwindow* window, GLFWkeyfun keyFun, GLFWcursorposfun cursorPosFun, GLFWscrollfun scrollFun, int& width, int& height);
-void initModelShader(const Shader* shader, Texture** textures);
 
 void do_movement(GLfloat deltaTime);
 
@@ -106,54 +104,19 @@ int main() {
 
 	int width, height;
 	sceneInitialization(window, key_callback, mouse_callback, scroll_callback, width, height);
-	const GLfloat ar[2] { 0.5f, 0.2f };
-	Model* cube;
-	Model* lightSource;
 	Shader* shader;
-	Shader* lightSourceShader;
-	Texture* containerTexture;
-	Texture* containerTextureSpecular;
-	Texture** textures = new Texture*[2];
+	Model* nanosuit;
 	try {
 		shader = new Shader("Shaders/shader.vert", "Shaders/shader.frag");
-		lightSourceShader = new Shader("Shaders/lightSourceShader.vert", "Shaders/lightSourceShader.frag");
-		cube = new Model(verticesData, N);
-		lightSource = new Model(verticesData, N);
-		containerTexture = new Texture("Textures/container2.png");
-		containerTextureSpecular = new Texture("Textures/container2_specular.png");
-
-		textures[0] = containerTexture;
-		textures[1] = containerTextureSpecular;
+		nanosuit = new Model("Models/nanosuit/nanosuit.obj");
 	}
 	catch (std::exception ex) {
 		std::cout << ex.what();
 		glfwTerminate();
 		return -3;
 	}
-	glm::vec3 cubePositions[] = {
-		glm::vec3(0.0f,  0.0f,  0.0f),
-		glm::vec3(2.0f,  5.0f, -15.0f),
-		glm::vec3(-1.5f, -2.2f, -2.5f),
-		glm::vec3(-3.8f, -2.0f, -12.3f),
-		glm::vec3(2.4f, -0.4f, -3.5f),
-		glm::vec3(-1.7f,  3.0f, -7.5f),
-		glm::vec3(1.3f, -2.0f, -2.5f),
-		glm::vec3(1.5f,  2.0f, -2.5f),
-		glm::vec3(1.5f,  0.2f, -1.5f),
-		glm::vec3(-1.3f,  1.0f, -1.5f)
-	};
-
-	glm::vec3 pointLightPositions[] = {
-		glm::vec3(0.7f,  0.2f,  2.0f),
-		glm::vec3(2.3f, -3.3f, -4.0f),
-		glm::vec3(-4.0f,  2.0f, -12.0f),
-		glm::vec3(0.0f,  0.0f, -3.0f)
-	};
-	GLfloat deltaTime = 0.0f;
-	GLfloat lastFrame = 0.0f;
-
-
-	initModelShader(shader, textures);
+	float deltaTime = 0.0f;
+	float lastFrame = 0.0f;
 	while (glfwWindowShouldClose(window) != GL_TRUE) {
 		GLdouble currentFrame = glfwGetTime();
 		deltaTime = currentFrame - lastFrame;
@@ -162,59 +125,22 @@ int main() {
 		glfwPollEvents();
 		do_movement(deltaTime);
 
-		lightSourceShader->use();
-		lightSource->bindVAO();
-
+		shader->use();
 		glm::mat4 projectionMatrix;
 		projectionMatrix = glm::perspective(glm::radians(camera.zoom), (float)width / height, 0.1f, 100.0f);
 		glm::mat4 viewMatrix = camera.getViewMatrix();
-		glm::mat4 modelMatrix;
-		glm::mat3 normalMatrix;
 
-		lightSourceShader->sendMatrix4("view", viewMatrix);
-		lightSourceShader->sendMatrix4("projection", projectionMatrix);
-
-		modelMatrix = glm::mat4();
-		modelMatrix = glm::rotate(modelMatrix, glm::radians(angleLightPosition), glm::vec3(-1.0f, 0.0f, 1.0f));
-		modelMatrix = glm::translate(modelMatrix, lightPosition);
-		modelMatrix = glm::scale(modelMatrix, glm::vec3(0.2f));
-		lightSourceShader->sendMatrix4("model", modelMatrix);
-
-		glDrawArrays(GL_TRIANGLES, 0, lightSource->getVerticesCount());
-
-
-		glm::vec3 lightPositionCurrent = glm::vec3(modelMatrix * glm::vec4(lightPosition, 1.0f));
-		shader->use();
-		cube->bindVAO();
-
-		shader->sendMatrix3("normalMatrix", normalMatrix);
-		shader->sendVector3("viewPos", camera.position);
-		shader->sendVector3("dirLight.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
-		shader->sendVector3("pointLights[0].position", lightPositionCurrent);
-		shader->sendVector3("spotlight.position", camera.position);
-		shader->sendVector3("spotlight.direction", camera.front);
-		shader->sendMatrix4("model", modelMatrix);
 		shader->sendMatrix4("view", viewMatrix);
 		shader->sendMatrix4("projection", projectionMatrix);
 
-		for (int i = 0; i < 10; i++) {
-			glm::mat4 modelMatrix, normalMatrix;
-			modelMatrix = glm::translate(modelMatrix, cubePositions[i]);
-			float angle = 20 * i;
-			modelMatrix = glm::rotate(modelMatrix, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+		glm::mat4 modelMatrix;
+		modelMatrix = glm::rotate(modelMatrix, glm::radians(angleLightPosition), glm::vec3(-1.0f, 0.0f, 1.0f));
+		modelMatrix = glm::translate(modelMatrix, lightPosition);
+		modelMatrix = glm::scale(modelMatrix, glm::vec3(0.2f));
+		shader->sendMatrix4("model", modelMatrix);
+		nanosuit->draw(*shader);
 
-			normalMatrix = glm::transpose(glm::inverse(modelMatrix));
-			shader->sendMatrix4("model", modelMatrix);
-			shader->sendMatrix4("normalMatrix", normalMatrix);
-
-
-			normalMatrix = glm::transpose(glm::inverse(modelMatrix));
-			glDrawArrays(GL_TRIANGLES, 0, cube->getVerticesCount());
-		}
-
-		cube->unbindVAO();
 		shader->stop();
-
 		glfwSwapBuffers(window);
 	}
 
@@ -316,31 +242,4 @@ void sceneInitialization(GLFWwindow* window, GLFWkeyfun keyFun, GLFWcursorposfun
 	glfwSetScrollCallback(window, scrollFun);
 	glEnable(GL_DEPTH_TEST);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-}
-
-void initModelShader(const Shader* shader, Texture** textures) {
-	shader->use();
-	shader->sendFloat("material.shininess", 64.0f);
-	textures[0]->bindTexture();
-	shader->sendInt("material.diffuse", textures[0]->getTextureUnit());
-	textures[1]->bindTexture();
-	shader->sendInt("material.specular", textures[1]->getTextureUnit());
-	shader->sendVector3("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
-
-	shader->sendVector3("dirLight.ambient", glm::vec3(0.2f, 0.2f, 0.2f));
-	shader->sendVector3("dirLight.diffuse", glm::vec3(0.5f, 0.5f, 0.5f));
-	shader->sendVector3("dirLight.specular", glm::vec3(1.0f, 1.0f, 1.0f));
-
-	shader->sendVector3("pointLights[0].ambient", glm::vec3(0.2f, 0.2f, 0.2f));
-	shader->sendVector3("pointLights[0].diffuse", glm::vec3(0.5f, 0.5f, 0.5f));
-	shader->sendVector3("pointLights[0].specular", glm::vec3(1.0f, 1.0f, 1.0f));
-	shader->sendFloat("pointLights[0].constant", 1.0f);
-	shader->sendFloat("pointLights[0].linear", 0.09f);
-	shader->sendFloat("pointLights[0].quadratic", 0.032f);
-
-	shader->sendFloat("spotlight.cutOff", glm::cos(glm::radians(12.5f)));
-	shader->sendVector3("spotlight.ambient", glm::vec3(0.2f, 0.2f, 0.2f));
-	shader->sendVector3("spotlight.diffuse", glm::vec3(0.5f, 0.5f, 0.5f));
-	shader->sendVector3("spotlight.specular", glm::vec3(1.0f, 1.0f, 1.0f));
-	shader->stop();
 }
